@@ -1,3 +1,4 @@
+ARG TARGETARCH
 FROM golang:1.17.13@sha256:87262e4a4c7db56158a80a18fefdc4fee5accc41b59cde821e691d05541bbb18
 
 # install requirements for LTP (Linux Test Program) tests
@@ -9,8 +10,13 @@ RUN apt-get install -y sudo python3 python3-pip
 RUN pip3 install boto3 unittest2 requests
 
 # install go tools for code format checking
-RUN wget --no-check-certificate https://ocs-cn-north1.heytapcs.com/cubefs/github/ci/go_bin.tar.gz
-RUN tar -zxf go_bin.tar.gz -C /go/
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+        wget https://raw.githubusercontent.com/ranimandepudi/rocksdb-prebuilt-libs/main/go_bin_arm64.tar.gz -O go_bin.tar.gz && \
+        mkdir -p /go && tar -zxf go_bin.tar.gz -C /go/; \
+    else \
+        wget --no-check-certificate https://ocs-cn-north1.heytapcs.com/cubefs/github/ci/go_bin.tar.gz && \
+        tar -zxf go_bin.tar.gz -C /go/; \
+    fi
 
 # prepare env cgo flags
 RUN go env -w CGO_CFLAGS="-I/go/src/github.com/cubefs/cubefs/build/include"

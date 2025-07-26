@@ -16,6 +16,7 @@ build_linux_arm64_gcc9() {
  #   export CC=aarch64-linux-gnu-gcc
     export EXTRA_CFLAGS="-Wno-error=deprecated-copy -fno-strict-aliasing -Wclass-memaccess -Wno-error=class-memaccess -Wpessimizing-move -Wno-error=pessimizing-move"
     export EXTRA_CXXFLAGS=$EXTRA_CFLAGS
+    
 
     CGO_ENABLED=1 GOOS=linux GOARCH=arm64 make
 }

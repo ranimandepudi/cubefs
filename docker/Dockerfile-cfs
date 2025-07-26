@@ -1,12 +1,20 @@
-FROM centos:7 AS base
+# BASE FOR AMD64 
+FROM --platform=$BUILDPLATFORM centos:7 AS base-amd64
 RUN curl -o /etc/yum.repos.d/epel-7.repo http://mirrors.aliyun.com/repo/epel-7.repo && \
-        yum install -y bind-utils xfsprogs jq fuse && yum clean all && \
-        rm -rf /var/cache/yum
+    yum install -y bind-utils xfsprogs jq fuse && yum clean all && \
+    rm -rf /var/cache/yum
 RUN mkdir -p /cfs/bin /cfs/conf /cfs/logs /cfs/data
 
-FROM base AS server 
+# BASE FOR ARM64
+FROM --platform=$BUILDPLATFORM rockylinux:8 AS base-arm64
+RUN dnf install -y bind-utils xfsprogs jq fuse && dnf clean all
+RUN mkdir -p /cfs/bin /cfs/conf /cfs/logs /cfs/data
+
+FROM base-${TARGETARCH} AS base
+
+FROM base AS server
 COPY build/bin/cfs-server /cfs/bin/
 COPY build/bin/cfs-cli /cfs/bin/
 
-FROM base AS client 
+FROM base AS client
 COPY build/bin/cfs-client /cfs/bin/
